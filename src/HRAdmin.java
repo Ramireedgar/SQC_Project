@@ -1,5 +1,5 @@
 /*\
- * HRAdmin.java
+ * user subclass for Admins to manage employee data
  */
 
 public class HRAdmin extends User {
