@@ -285,5 +285,59 @@ public class EmployeeDAO {
         }
         return results;
     }
+
+    public static int updateSalariesBelowThreshold(double threshold, double newSalary) {
+        if (threshold < 0) {
+            System.out.println("Error: Threshold must be positive.");
+            return -1;
+        }
+        if (newSalary < 0) {
+            System.out.println("Error: New salary must be positive.");
+            return -1;
+        }
+
+        String sql = "UPDATE employees SET salary = ? WHERE salary < ?";
+        
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setDouble(1, newSalary);
+                pstmt.setDouble(2, threshold);
+                
+                int rowsAffected = pstmt.executeUpdate();
+                conn.commit();
+                return rowsAffected;
+                
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("Error updating salaries: " + e.getMessage());
+                return -1;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    public static List<EmployeeData> getEmployeesBelowThreshold(double threshold) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE salary < ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, threshold);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving employees: " + e.getMessage());
+        }
+        return results;
+    }
 }
 
