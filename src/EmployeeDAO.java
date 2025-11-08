@@ -153,5 +153,137 @@ public class EmployeeDAO {
             return false;
         }
     }
+
+    public static List<EmployeeData> searchByEmployeeId(int empId) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE empid = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, empId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employee: " + e.getMessage());
+        }
+        return results;
+    }
+
+    public static List<EmployeeData> searchByName(String firstName, String lastName) {
+        List<EmployeeData> results = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM employees WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        if (firstName != null && !firstName.isEmpty()) {
+            sql.append(" AND LOWER(first_name) LIKE LOWER(?)");
+            params.add("%" + firstName + "%");
+        }
+        if (lastName != null && !lastName.isEmpty()) {
+            sql.append(" AND LOWER(last_name) LIKE LOWER(?)");
+            params.add("%" + lastName + "%");
+        }
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setString(i + 1, (String) params.get(i));
+            }
+            
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employees by name: " + e.getMessage());
+        }
+        return results;
+    }
+
+    public static List<EmployeeData> searchByDepartment(String department) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE LOWER(department) LIKE LOWER(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + department + "%");
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employees by department: " + e.getMessage());
+        }
+        return results;
+    }
+
+    public static List<EmployeeData> searchByEmail(String email) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE LOWER(email) = LOWER(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employee by email: " + e.getMessage());
+        }
+        return results;
+    }
+
+    public static List<EmployeeData> searchByMultipleCriteria(Map<String, Object> criteria) {
+        List<EmployeeData> results = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM employees WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        if (criteria.containsKey("department")) {
+            sql.append(" AND LOWER(department) LIKE LOWER(?)");
+            params.add("%" + criteria.get("department") + "%");
+        }
+        if (criteria.containsKey("salary_min")) {
+            sql.append(" AND salary >= ?");
+            params.add(criteria.get("salary_min"));
+        }
+        if (criteria.containsKey("salary_max")) {
+            sql.append(" AND salary <= ?");
+            params.add(criteria.get("salary_max"));
+        }
+        if (criteria.containsKey("first_name")) {
+            sql.append(" AND LOWER(first_name) LIKE LOWER(?)");
+            params.add("%" + criteria.get("first_name") + "%");
+        }
+        if (criteria.containsKey("last_name")) {
+            sql.append(" AND LOWER(last_name) LIKE LOWER(?)");
+            params.add("%" + criteria.get("last_name") + "%");
+        }
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                Object param = params.get(i);
+                if (param instanceof String) {
+                    pstmt.setString(i + 1, (String) param);
+                } else if (param instanceof Double) {
+                    pstmt.setDouble(i + 1, (Double) param);
+                } else if (param instanceof Integer) {
+                    pstmt.setInt(i + 1, (Integer) param);
+                }
+            }
+            
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in advanced search: " + e.getMessage());
+        }
+        return results;
+    }
 }
 
