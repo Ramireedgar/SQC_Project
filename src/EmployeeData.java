@@ -1,5 +1,3 @@
-import java.util.Date;
-
 /**
  * EmployeeData class represents employee information in the system.
  * This class is used to transfer employee data between the application and database.
