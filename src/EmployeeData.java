@@ -13,6 +13,8 @@ public class EmployeeData {
     private double salary;
     private String hireDate;
     private String address;
+    private int DOB; //style: ddmmyyyy
+    private int SSN;
 
     // Constructor
     public EmployeeData() {
@@ -20,7 +22,7 @@ public class EmployeeData {
 
     public EmployeeData(int empId, String firstName, String lastName, String email, 
                        String phone, String department, String position, 
-                       double salary, String hireDate, String address) {
+                       double salary, String hireDate, String address, int DOB, int SSN) {
         this.empId = empId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -31,6 +33,8 @@ public class EmployeeData {
         this.salary = salary;
         this.hireDate = hireDate;
         this.address = address;
+        this.DOB = DOB;
+        this.SSN = SSN;
     }
 
     // Getters and Setters
@@ -114,6 +118,22 @@ public class EmployeeData {
         this.address = address;
     }
 
+    public int getDOB(){
+        return DOB;
+    }
+
+    public void setDOB(int DOB){
+        this.DOB = DOB;
+    }
+
+    public int getSSN(){
+        return SSN;
+    }
+
+    public void setSSN(int SSN){
+        this.SSN = SSN;
+    }
+
     @Override
     public String toString() {
         return "EmployeeData{" +
@@ -127,6 +147,8 @@ public class EmployeeData {
                 ", salary=" + salary +
                 ", hireDate='" + hireDate + '\'' +
                 ", address='" + address + '\'' +
+                ", DOB='" + DOB + '\'' +
+                ", SSN='" + SSN + '\'' +
                 '}';
     }
 }
