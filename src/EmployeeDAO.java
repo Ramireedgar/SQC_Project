@@ -236,6 +236,42 @@ public class EmployeeDAO {
         return results;
     }
 
+    public static List<EmployeeData> searchByDOB(int DOB){//style: ddmmyyyy 
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE DOB = ?";
+        try (Connection conn = getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, DOB);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return mapResultSetToEmployeeData(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employee by date of birth: " + e.getMessage());
+        }
+        return results;
+    }
+
+    public static List<EmployeeData> searchBySSN(int SSN){//style: same but no dashes
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE SSN = ?";
+        try (Connection conn = getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, SSN);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return mapResultSetToEmployeeData(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching employee by social security number: " + e.getMessage());
+        }
+        return results;
+    }
+
+    
+
     public static List<EmployeeData> searchByMultipleCriteria(Map<String, Object> criteria) {
         List<EmployeeData> results = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM employees WHERE 1=1");
