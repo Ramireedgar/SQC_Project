@@ -12,9 +12,9 @@ public class Authenticator {
 
     public static User login(String username, String passwordInput){
         
-        String sqlcommand = "SELECT empid, username, password, role FROM user_accounts " +
+        String sqlcommand = "SELECT empid, username, password_hash, role FROM users " +
                      "WHERE username = '" + username + "' " +
-                     "AND password = '" + passwordInput + "'";
+                     "AND password_hash = '" + passwordInput + "'";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement();
@@ -30,7 +30,7 @@ public class Authenticator {
                       .append(" (Role: ").append(role).append(")");
                 System.out.println(output.toString());
 
-                if (role.equalsIgnoreCase("HR")) {
+                if (role.equalsIgnoreCase("HR_ADMIN")) {
                     return new HRAdmin(empid, username, passwordInput);
                 } else {
                     return new Employee(empid, username, passwordInput);

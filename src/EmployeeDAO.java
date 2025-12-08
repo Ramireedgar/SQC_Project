@@ -12,6 +12,40 @@ public class EmployeeDAO {
         return DriverManager.getConnection(url, user, password);
     }
 
+    public static boolean createEmployee(EmployeeData emp) {
+        // Updated SQL to include empid explicitly
+        String sql = "INSERT INTO employees (empid, first_name, last_name, email, phone, " +
+                     "department, position, salary, hire_date, address, DOB, SSN) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            // Set the ID manually
+            pstmt.setInt(1, emp.getEmpId());
+            
+            // Shift all other indices down by 1
+            pstmt.setString(2, emp.getFirstName());
+            pstmt.setString(3, emp.getLastName());
+            pstmt.setString(4, emp.getEmail());
+            pstmt.setString(5, emp.getPhone());
+            pstmt.setString(6, emp.getDepartment());
+            pstmt.setString(7, emp.getPosition());
+            pstmt.setDouble(8, emp.getSalary());
+            pstmt.setString(9, emp.getHireDate());
+            pstmt.setString(10, emp.getAddress());
+            pstmt.setInt(11, emp.getDOB());
+            pstmt.setInt(12, emp.getSSN());
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Error creating employee: " + e.getMessage());
+            return false;
+        }
+    }
+
     private static boolean employeeExists(int empId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM employees WHERE empid = ?";
         try (Connection conn = getConnection();

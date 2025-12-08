@@ -10,15 +10,109 @@ public class HRAdmin extends User {
 
     @Override
     public void showMenu() {
-        System.out.println("HR Admin Menu:");
-        System.out.println("1. View All Employee Data");
-        System.out.println("2. Create Employee");
-        System.out.println("3. Delete Employee");
-        System.out.println("4. Update Employee");
-        System.out.println("5. Search Employee");
-        System.out.println("6. Update Salaries Below Threshold");
-        System.out.println("7. Logout");
+        int option = 0;
+        do {
+            System.out.println("\n=== HR Admin Menu ===");
+            System.out.println("1. View All Employee Data (Not Implemented)");
+            System.out.println("2. Create Employee");
+            System.out.println("3. Delete Employee (Not Implemented)");
+            System.out.println("4. Update Employee");
+            System.out.println("5. Search Employee");
+            System.out.println("6. Update Salaries Below Threshold");
+            System.out.println("7. Logout");
+            System.out.print("Select an option: ");
+
+            try {
+                String input = scanner.nextLine();
+                option = Integer.parseInt(input);
+
+                switch (option) {
+                    case 1:
+                        System.out.println("Feature coming soon...");
+                        break;
+                    case 2:
+                        createEmployee();
+                        break;
+                    case 3:
+                        System.out.println("Feature coming soon...");
+                        break;
+                    case 4:
+                        updateEmployeeData();
+                        break;
+                    case 5:
+                        searchEmployee();
+                        break;
+                    case 6:
+                        updateSalariesBelowThreshold();
+                        break;
+                    case 7:
+                        System.out.println("Logging out...");
+                        break;
+                    default:
+                        System.out.println("Invalid option, please try again.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                option = 0; // Reset to ensure loop continues
+            }
+        } while (option != 7);
     }
+
+    public void createEmployee() {
+        System.out.println("\n=== Create New Employee ===");
+        try {
+            EmployeeData newEmp = new EmployeeData();
+
+            System.out.print("Employee ID: ");
+            newEmp.setEmpId(Integer.parseInt(scanner.nextLine()));
+            
+            System.out.print("First Name: ");
+            newEmp.setFirstName(scanner.nextLine());
+
+            System.out.print("Last Name: ");
+            newEmp.setLastName(scanner.nextLine());
+
+            System.out.print("Email: ");
+            newEmp.setEmail(scanner.nextLine());
+
+            System.out.print("Phone: ");
+            newEmp.setPhone(scanner.nextLine());
+
+            System.out.print("Department: ");
+            newEmp.setDepartment(scanner.nextLine());
+
+            System.out.print("Position: ");
+            newEmp.setPosition(scanner.nextLine());
+
+            System.out.print("Salary: ");
+            newEmp.setSalary(Double.parseDouble(scanner.nextLine()));
+
+            System.out.print("Hire Date (YYYY-MM-DD): ");
+            newEmp.setHireDate(scanner.nextLine());
+
+            System.out.print("Address: ");
+            newEmp.setAddress(scanner.nextLine());
+            
+            // Assuming simplified integer input for these based on your EmployeeData class
+            System.out.print("DOB (DDMMYYYY): "); 
+            newEmp.setDOB(Integer.parseInt(scanner.nextLine()));
+
+            System.out.print("SSN (No dashes): ");
+            newEmp.setSSN(Integer.parseInt(scanner.nextLine()));
+
+            boolean success = EmployeeDAO.createEmployee(newEmp);
+            
+            if (success) {
+                System.out.println("Employee created successfully!");
+            } else {
+                System.out.println("Failed to create employee.");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid number format. Employee creation cancelled.");
+        }
+    }
+
 
     public void updateEmployeeData() {
         System.out.println("\n=== Update Employee Data ===");
