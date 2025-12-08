@@ -201,7 +201,9 @@ public class HRAdmin extends User {
         System.out.println("2. Search by Name");
         System.out.println("3. Search by Department");
         System.out.println("4. Search by Email");
-        System.out.println("5. Advanced Search (Multiple Criteria)");
+        System.out.println("5. Search by DOB");
+        System.out.println("6. Search by SSN");
+        System.out.println("7. Advanced Search (Multiple Criteria)");
         System.out.print("Select search option: ");
         
         try {
@@ -243,6 +245,30 @@ public class HRAdmin extends User {
                     break;
                     
                 case 5:
+                    System.out.print("Enter DOB (format: ddmmyyyy, e.g., 15011990): ");
+                    String dobStr = scanner.nextLine();
+                    try {
+                        int dob = Integer.parseInt(dobStr);
+                        results = EmployeeDAO.searchByDOB(dob);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid DOB format! Please use ddmmyyyy format (e.g., 15011990).");
+                        return;
+                    }
+                    break;
+                    
+                case 6:
+                    System.out.print("Enter SSN (format: numbers only, no dashes, e.g., 123456789): ");
+                    String ssnStr = scanner.nextLine();
+                    try {
+                        int ssn = Integer.parseInt(ssnStr);
+                        results = EmployeeDAO.searchBySSN(ssn);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid SSN format! Please use numbers only (no dashes).");
+                        return;
+                    }
+                    break;
+                    
+                case 7:
                     Map<String, Object> criteria = new HashMap<>();
                     System.out.print("Enter Department (or press Enter to skip): ");
                     String dept = scanner.nextLine();
