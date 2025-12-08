@@ -44,6 +44,16 @@ public class EmployeeDAO {
         emp.setSalary(rs.getDouble("salary"));
         emp.setHireDate(rs.getString("hire_date"));
         emp.setAddress(rs.getString("address"));
+        try {
+            emp.setDOB(rs.getInt("DOB"));
+        } catch (SQLException e) {
+            // DOB column might not exist in all tables, ignore if missing
+        }
+        try {
+            emp.setSSN(rs.getInt("SSN"));
+        } catch (SQLException e) {
+            // SSN column might not exist in all tables, ignore if missing
+        }
         return emp;
     }
 
@@ -244,8 +254,8 @@ public class EmployeeDAO {
             pstmt.setInt(1, DOB);
             ResultSet rs = pstmt.executeQuery();
             
-            if (rs.next()) {
-                return mapResultSetToEmployeeData(rs);
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
             }
         } catch (SQLException e) {
             System.out.println("Error searching employee by date of birth: " + e.getMessage());
@@ -261,8 +271,8 @@ public class EmployeeDAO {
             pstmt.setInt(1, SSN);
             ResultSet rs = pstmt.executeQuery();
             
-            if (rs.next()) {
-                return mapResultSetToEmployeeData(rs);
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
             }
         } catch (SQLException e) {
             System.out.println("Error searching employee by social security number: " + e.getMessage());
