@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -416,6 +417,107 @@ public class EmployeeDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error retrieving employees: " + e.getMessage());
+        }
+        return results;
+    }
+
+    /**
+     * Get pay report grouped by job title (position) for a given month
+     * Returns a map with job title as key and a map containing:
+     * - "count": number of employees
+     * - "totalMonthlyPay": total monthly pay for that job title
+     * - "averageMonthlyPay": average monthly pay for that job title
+     */
+    public static Map<String, Map<String, Object>> getPayReportByJobTitle(int year, int month) {
+        Map<String, Map<String, Object>> report = new HashMap<>();
+        String sql = "SELECT position, COUNT(*) as emp_count, SUM(salary) as total_salary, AVG(salary) as avg_salary " +
+                     "FROM employees " +
+                     "GROUP BY position " +
+                     "ORDER BY position";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String position = rs.getString("position");
+                int count = rs.getInt("emp_count");
+                double totalSalary = rs.getDouble("total_salary");
+                double avgSalary = rs.getDouble("avg_salary");
+                
+                Map<String, Object> data = new HashMap<>();
+                data.put("count", count);
+                data.put("totalMonthlyPay", totalSalary / 12.0);
+                data.put("averageMonthlyPay", avgSalary / 12.0);
+                data.put("totalAnnualPay", totalSalary);
+                data.put("averageAnnualPay", avgSalary);
+                
+                report.put(position, data);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating pay report by job title: " + e.getMessage());
+        }
+        return report;
+    }
+
+    /**
+     * Get pay report grouped by division (department) for a given month
+     * Returns a map with department as key and a map containing:
+     * - "count": number of employees
+     * - "totalMonthlyPay": total monthly pay for that department
+     * - "averageMonthlyPay": average monthly pay for that department
+     */
+    public static Map<String, Map<String, Object>> getPayReportByDivision(int year, int month) {
+        Map<String, Map<String, Object>> report = new HashMap<>();
+        String sql = "SELECT department, COUNT(*) as emp_count, SUM(salary) as total_salary, AVG(salary) as avg_salary " +
+                     "FROM employees " +
+                     "GROUP BY department " +
+                     "ORDER BY department";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String department = rs.getString("department");
+                int count = rs.getInt("emp_count");
+                double totalSalary = rs.getDouble("total_salary");
+                double avgSalary = rs.getDouble("avg_salary");
+                
+                Map<String, Object> data = new HashMap<>();
+                data.put("count", count);
+                data.put("totalMonthlyPay", totalSalary / 12.0);
+                data.put("averageMonthlyPay", avgSalary / 12.0);
+                data.put("totalAnnualPay", totalSalary);
+                data.put("averageAnnualPay", avgSalary);
+                
+                report.put(department, data);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating pay report by division: " + e.getMessage());
+        }
+        return report;
+    }
+
+    /**
+     * Get employees hired within a date range
+     * Returns a list of EmployeeData objects
+     */
+    public static List<EmployeeData> getEmployeesHiredByDateRange(String startDate, String endDate) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE hire_date >= ? AND hire_date <= ? ORDER BY hire_date";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving employees by hire date range: " + e.getMessage());
         }
         return results;
     }

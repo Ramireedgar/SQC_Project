@@ -19,7 +19,8 @@ public class HRAdmin extends User {
             System.out.println("4. Update Employee");
             System.out.println("5. Search Employee");
             System.out.println("6. Update Salaries Below Threshold");
-            System.out.println("7. Logout");
+            System.out.println("7. Report: Pay by Division");
+            System.out.println("8. Logout");
             System.out.print("Select an option: ");
 
             try {
@@ -42,12 +43,15 @@ public class HRAdmin extends User {
                     case 5:
                         searchEmployee();
                         break;
-                    case 6:
-                        updateSalariesBelowThreshold();
-                        break;
-                    case 7:
-                        System.out.println("Logging out...");
-                        break;
+                case 6:
+                    updateSalariesBelowThreshold();
+                    break;
+                case 7:
+                    generatePayReportByDivision();
+                    break;
+                case 8:
+                    System.out.println("Logging out...");
+                    break;
                     default:
                         System.out.println("Invalid option, please try again.");
                 }
@@ -55,7 +59,7 @@ public class HRAdmin extends User {
                 System.out.println("Invalid input! Please enter a number.");
                 option = 0; // Reset to ensure loop continues
             }
-        } while (option != 7);
+        } while (option != 8);
     }
 
     public void createEmployee() {
@@ -364,5 +368,68 @@ public class HRAdmin extends User {
         } catch (NumberFormatException e) {
             System.out.println("Invalid number format!");
         }
+    }
+
+    public void generatePayReportByDivision() {
+        System.out.println("\n=== Pay Report by Division ===");
+        
+        try {
+            System.out.print("Enter Year (e.g., 2024): ");
+            int year = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Enter Month (1-12): ");
+            int month = Integer.parseInt(scanner.nextLine());
+            
+            if (month < 1 || month > 12) {
+                System.out.println("Invalid month! Please enter a value between 1 and 12.");
+                return;
+            }
+            
+            Map<String, Map<String, Object>> report = EmployeeDAO.getPayReportByDivision(year, month);
+            
+            if (report.isEmpty()) {
+                System.out.println("No data found for the specified period.");
+                return;
+            }
+            
+            System.out.println("\n==========================================");
+            System.out.println("PAY REPORT BY DIVISION");
+            System.out.println("Period: " + getMonthName(month) + " " + year);
+            System.out.println("==========================================");
+            System.out.printf("%-30s %-10s %-20s %-20s%n", "Division", "Count", "Total Monthly Pay", "Average Monthly Pay");
+            System.out.println("----------------------------------------------------------------------------");
+            
+            double grandTotalMonthly = 0;
+            int grandTotalCount = 0;
+            
+            for (Map.Entry<String, Map<String, Object>> entry : report.entrySet()) {
+                String division = entry.getKey();
+                Map<String, Object> data = entry.getValue();
+                int count = (Integer) data.get("count");
+                double totalMonthlyPay = (Double) data.get("totalMonthlyPay");
+                double avgMonthlyPay = (Double) data.get("averageMonthlyPay");
+                
+                System.out.printf("%-30s %-10d $%-19.2f $%-19.2f%n", 
+                    division, count, totalMonthlyPay, avgMonthlyPay);
+                
+                grandTotalMonthly += totalMonthlyPay;
+                grandTotalCount += count;
+            }
+            
+            System.out.println("----------------------------------------------------------------------------");
+            System.out.printf("%-30s %-10d $%-19.2f%n", "TOTAL", grandTotalCount, grandTotalMonthly);
+            System.out.println("==========================================\n");
+            
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input format! Please enter valid numbers.");
+        }
+    }
+
+    private String getMonthName(int month) {
+        String[] monthNames = {
+            "", "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+        return monthNames[month];
     }
 }
