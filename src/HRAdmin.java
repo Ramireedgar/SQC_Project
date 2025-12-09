@@ -13,13 +13,11 @@ public class HRAdmin extends User {
         int option = 0;
         do {
             System.out.println("\n=== HR Admin Menu ===");
-            System.out.println("1. View All Employee Data (Not Implemented)");
-            System.out.println("2. Create Employee");
-            System.out.println("3. Delete Employee (Not Implemented)");
-            System.out.println("4. Update Employee");
-            System.out.println("5. Search Employee");
-            System.out.println("6. Update Salaries Below Threshold");
-            System.out.println("7. Logout");
+            System.out.println("1. Create Employee");
+            System.out.println("2. Update Employee");
+            System.out.println("3. Search Employee");
+            System.out.println("4. Update Salaries in range (min-max)");
+            System.out.println("5. Logout");
             System.out.print("Select an option: ");
 
             try {
@@ -28,24 +26,18 @@ public class HRAdmin extends User {
 
                 switch (option) {
                     case 1:
-                        System.out.println("Feature coming soon...");
-                        break;
-                    case 2:
                         createEmployee();
                         break;
-                    case 3:
-                        System.out.println("Feature coming soon...");
-                        break;
-                    case 4:
+                    case 2:
                         updateEmployeeData();
                         break;
-                    case 5:
+                    case 3:
                         searchEmployee();
                         break;
-                    case 6:
-                        updateSalariesBelowThreshold();
+                    case 4:
+                        updateSalariesByRange();
                         break;
-                    case 7:
+                    case 5:
                         System.out.println("Logging out...");
                         break;
                     default:
@@ -55,7 +47,7 @@ public class HRAdmin extends User {
                 System.out.println("Invalid input! Please enter a number.");
                 option = 0; // Reset to ensure loop continues
             }
-        } while (option != 7);
+        } while (option != 5);
     }
 
     public void createEmployee() {
@@ -75,23 +67,11 @@ public class HRAdmin extends User {
             System.out.print("Email: ");
             newEmp.setEmail(scanner.nextLine());
 
-            System.out.print("Phone: ");
-            newEmp.setPhone(scanner.nextLine());
-
-            System.out.print("Department: ");
-            newEmp.setDepartment(scanner.nextLine());
-
-            System.out.print("Position: ");
-            newEmp.setPosition(scanner.nextLine());
-
             System.out.print("Salary: ");
             newEmp.setSalary(Double.parseDouble(scanner.nextLine()));
 
             System.out.print("Hire Date (YYYY-MM-DD): ");
             newEmp.setHireDate(scanner.nextLine());
-
-            System.out.print("Address: ");
-            newEmp.setAddress(scanner.nextLine());
             
             // Assuming simplified integer input for these based on your EmployeeData class
             System.out.print("DOB (DDMMYYYY): "); 
@@ -130,12 +110,8 @@ public class HRAdmin extends User {
             System.out.println("First Name: " + currentEmployee.getFirstName());
             System.out.println("Last Name: " + currentEmployee.getLastName());
             System.out.println("Email: " + currentEmployee.getEmail());
-            System.out.println("Phone: " + currentEmployee.getPhone());
-            System.out.println("Department: " + currentEmployee.getDepartment());
-            System.out.println("Position: " + currentEmployee.getPosition());
             System.out.println("Salary: " + currentEmployee.getSalary());
             System.out.println("Hire Date: " + currentEmployee.getHireDate());
-            System.out.println("Address: " + currentEmployee.getAddress());
             
             EmployeeData updatedData = new EmployeeData();
             
@@ -151,19 +127,7 @@ public class HRAdmin extends User {
             
             System.out.print("Email: ");
             String email = scanner.nextLine();
-            if (!email.isEmpty()) updatedData.setEmail(email);
-            
-            System.out.print("Phone: ");
-            String phone = scanner.nextLine();
-            if (!phone.isEmpty()) updatedData.setPhone(phone);
-            
-            System.out.print("Department: ");
-            String department = scanner.nextLine();
-            if (!department.isEmpty()) updatedData.setDepartment(department);
-            
-            System.out.print("Position: ");
-            String position = scanner.nextLine();
-            if (!position.isEmpty()) updatedData.setPosition(position);
+            if (!email.isEmpty()) updatedData.setEmail(email);;
             
             System.out.print("Salary: ");
             String salaryStr = scanner.nextLine();
@@ -179,9 +143,6 @@ public class HRAdmin extends User {
             String hireDate = scanner.nextLine();
             if (!hireDate.isEmpty()) updatedData.setHireDate(hireDate);
             
-            System.out.print("Address: ");
-            String address = scanner.nextLine();
-            if (!address.isEmpty()) updatedData.setAddress(address);
             
             boolean success = EmployeeDAO.updateEmployee(empId, updatedData);
             if (success) {
@@ -199,11 +160,8 @@ public class HRAdmin extends User {
         System.out.println("\n=== Search Employee ===");
         System.out.println("1. Search by Employee ID");
         System.out.println("2. Search by Name");
-        System.out.println("3. Search by Department");
-        System.out.println("4. Search by Email");
-        System.out.println("5. Search by DOB");
-        System.out.println("6. Search by SSN");
-        System.out.println("7. Advanced Search (Multiple Criteria)");
+        System.out.println("3. Search by DOB");
+        System.out.println("4. Search by SSN");
         System.out.print("Select search option: ");
         
         try {
@@ -230,21 +188,8 @@ public class HRAdmin extends User {
                         firstName.isEmpty() ? null : firstName,
                         lastName.isEmpty() ? null : lastName
                     );
-                    break;
-                    
+                    break;   
                 case 3:
-                    System.out.print("Enter Department: ");
-                    String department = scanner.nextLine();
-                    results = EmployeeDAO.searchByDepartment(department);
-                    break;
-                    
-                case 4:
-                    System.out.print("Enter Email: ");
-                    String email = scanner.nextLine();
-                    results = EmployeeDAO.searchByEmail(email);
-                    break;
-                    
-                case 5:
                     System.out.print("Enter DOB (format: ddmmyyyy, e.g., 15011990): ");
                     String dobStr = scanner.nextLine();
                     try {
@@ -256,7 +201,7 @@ public class HRAdmin extends User {
                     }
                     break;
                     
-                case 6:
+                case 4:
                     System.out.print("Enter SSN (format: numbers only, no dashes, e.g., 123456789): ");
                     String ssnStr = scanner.nextLine();
                     try {
@@ -266,22 +211,7 @@ public class HRAdmin extends User {
                         System.out.println("Invalid SSN format! Please use numbers only (no dashes).");
                         return;
                     }
-                    break;
-                    
-                case 7:
-                    Map<String, Object> criteria = new HashMap<>();
-                    System.out.print("Enter Department (or press Enter to skip): ");
-                    String dept = scanner.nextLine();
-                    if (!dept.isEmpty()) criteria.put("department", dept);
-                    System.out.print("Enter Minimum Salary (or press Enter to skip): ");
-                    String minSalary = scanner.nextLine();
-                    if (!minSalary.isEmpty()) criteria.put("salary_min", Double.parseDouble(minSalary));
-                    System.out.print("Enter Maximum Salary (or press Enter to skip): ");
-                    String maxSalary = scanner.nextLine();
-                    if (!maxSalary.isEmpty()) criteria.put("salary_max", Double.parseDouble(maxSalary));
-                    results = EmployeeDAO.searchByMultipleCriteria(criteria);
-                    break;
-                    
+                    break;       
                 default:
                     System.out.println("Invalid option!");
                     return;
@@ -296,8 +226,6 @@ public class HRAdmin extends User {
                     System.out.println("ID: " + emp.getEmpId());
                     System.out.println("Name: " + emp.getFirstName() + " " + emp.getLastName());
                     System.out.println("Email: " + emp.getEmail());
-                    System.out.println("Department: " + emp.getDepartment());
-                    System.out.println("Position: " + emp.getPosition());
                     System.out.println("Salary: " + emp.getSalary());
                     System.out.println("----------------------------------------------------------------------------");
                 }
@@ -365,4 +293,39 @@ public class HRAdmin extends User {
             System.out.println("Invalid number format!");
         }
     }
+
+    public void updateSalariesByRange() {
+        System.out.println("\n=== Bulk Update Salaries (By Range) ===");
+        try {
+            System.out.print("Enter Minimum Salary: ");
+            double min = Double.parseDouble(scanner.nextLine());
+
+            System.out.print("Enter Maximum Salary: ");
+            double max = Double.parseDouble(scanner.nextLine());
+
+            System.out.print("Enter Percentage Increase (e.g., 10 for 10%, -5 for -5%): ");
+            double percent = Double.parseDouble(scanner.nextLine());
+
+            // Confirmation
+            System.out.println("This will update ALL salaries between $" + min + " and $" + max + " by " + percent + "%.");
+            System.out.print("Are you sure? (yes/no): ");
+            String confirm = scanner.nextLine();
+
+            if (confirm.equalsIgnoreCase("yes")) {
+                int count = EmployeeDAO.updateSalariesInRange(min, max, percent);
+                
+                if (count >= 0) {
+                    System.out.println("Success! Updated " + count + " employee(s).");
+                } else {
+                    System.out.println("An error occurred during the update.");
+                }
+            } else {
+                System.out.println("Operation cancelled.");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid number format. Please enter valid numbers.");
+        }
+    }
+
 }

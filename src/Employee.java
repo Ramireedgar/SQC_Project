@@ -4,7 +4,10 @@
 
 import java.util.Scanner;
 
+// Ensure it says "extends User" here to fix the "Type mismatch" error
 public class Employee extends User {
+
+    // This is the Constructor that was missing
     public Employee(int empId, String username, String password) {
         super(empId, username, password);
     }
@@ -26,8 +29,7 @@ public class Employee extends User {
 
                 switch (option) {
                     case 1:
-                        // You will need to implement a 'getById' using this.getEmpId() later
-                        System.out.println("Personal Data View: (Feature coming soon...)");
+                        viewPersonalData();
                         break;
                     case 2:
                         System.out.println("Logging out...");
@@ -39,5 +41,27 @@ public class Employee extends User {
                 System.out.println("Invalid input! Please enter a number.");
             }
         } while (option != 2);
+    }
+
+    private void viewPersonalData() {
+        // Use the ID from the User class (inherited)
+        int myId = this.getEmpId();
+        
+        System.out.println("\n--- My Personal Information ---");
+        
+        // Use the existing DAO method to fetch data
+        EmployeeData emp = EmployeeDAO.getEmployeeById(myId);
+
+        if (emp != null) {
+            System.out.println("Employee ID:  " + emp.getEmpId());
+            System.out.println("Name:         " + emp.getFirstName() + " " + emp.getLastName());
+            System.out.println("Email:        " + emp.getEmail());
+            System.out.println("Salary:       $" + emp.getSalary());
+            System.out.println("Hire Date:    " + emp.getHireDate());
+        } else {
+            System.out.println("Error: Could not retrieve data for ID " + myId);
+            System.out.println("Please contact HR Admin.");
+        }
+        System.out.println("-------------------------------");
     }
 }

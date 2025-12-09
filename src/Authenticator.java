@@ -8,7 +8,7 @@ import java.sql.*;
 public class Authenticator {
     private static final String url = "jdbc:mysql://localhost:3306/employeeData";
     private static final String user = "root";
-    private static final String password = "password";  // Change here
+    private static final String password = "Sanjithekitten976";  // Change here
 
     public static User login(String username, String passwordInput){
         

@@ -6,7 +6,7 @@ import java.util.Map;
 public class EmployeeDAO {
     private static final String url = "jdbc:mysql://localhost:3306/employeeData";
     private static final String user = "root";
-    private static final String password = "password";
+    private static final String password = "Sanjithekitten976";
 
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, user, password);
@@ -14,9 +14,9 @@ public class EmployeeDAO {
 
     public static boolean createEmployee(EmployeeData emp) {
         // Updated SQL to include empid explicitly
-        String sql = "INSERT INTO employees (empid, first_name, last_name, email, phone, " +
-                     "department, position, salary, hire_date, address, DOB, SSN) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO employees (empid, Fname, Lname, email, " +
+                     "Salary, HireDate, DOB, SSN) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -28,14 +28,10 @@ public class EmployeeDAO {
             pstmt.setString(2, emp.getFirstName());
             pstmt.setString(3, emp.getLastName());
             pstmt.setString(4, emp.getEmail());
-            pstmt.setString(5, emp.getPhone());
-            pstmt.setString(6, emp.getDepartment());
-            pstmt.setString(7, emp.getPosition());
-            pstmt.setDouble(8, emp.getSalary());
-            pstmt.setString(9, emp.getHireDate());
-            pstmt.setString(10, emp.getAddress());
-            pstmt.setInt(11, emp.getDOB());
-            pstmt.setInt(12, emp.getSSN());
+            pstmt.setDouble(5, emp.getSalary());
+            pstmt.setString(6, emp.getHireDate());
+            pstmt.setInt(7, emp.getDOB());
+            pstmt.setInt(8, emp.getSSN());
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -69,15 +65,11 @@ public class EmployeeDAO {
     private static EmployeeData mapResultSetToEmployeeData(ResultSet rs) throws SQLException {
         EmployeeData emp = new EmployeeData();
         emp.setEmpId(rs.getInt("empid"));
-        emp.setFirstName(rs.getString("first_name"));
-        emp.setLastName(rs.getString("last_name"));
+        emp.setFirstName(rs.getString("Fname"));
+        emp.setLastName(rs.getString("Lname"));
         emp.setEmail(rs.getString("email"));
-        emp.setPhone(rs.getString("phone"));
-        emp.setDepartment(rs.getString("department"));
-        emp.setPosition(rs.getString("position"));
-        emp.setSalary(rs.getDouble("salary"));
-        emp.setHireDate(rs.getString("hire_date"));
-        emp.setAddress(rs.getString("address"));
+        emp.setSalary(rs.getDouble("Salary"));
+        emp.setHireDate(rs.getString("HireDate"));
         try {
             emp.setDOB(rs.getInt("DOB"));
         } catch (SQLException e) {
@@ -141,18 +133,6 @@ public class EmployeeDAO {
                 updateFields.add("email = ?");
                 updateValues.add(employeeData.getEmail());
             }
-            if (employeeData.getPhone() != null && !employeeData.getPhone().isEmpty()) {
-                updateFields.add("phone = ?");
-                updateValues.add(employeeData.getPhone());
-            }
-            if (employeeData.getDepartment() != null && !employeeData.getDepartment().isEmpty()) {
-                updateFields.add("department = ?");
-                updateValues.add(employeeData.getDepartment());
-            }
-            if (employeeData.getPosition() != null && !employeeData.getPosition().isEmpty()) {
-                updateFields.add("position = ?");
-                updateValues.add(employeeData.getPosition());
-            }
             if (employeeData.getSalary() > 0) {
                 updateFields.add("salary = ?");
                 updateValues.add(employeeData.getSalary());
@@ -161,11 +141,6 @@ public class EmployeeDAO {
                 updateFields.add("hire_date = ?");
                 updateValues.add(employeeData.getHireDate());
             }
-            if (employeeData.getAddress() != null && !employeeData.getAddress().isEmpty()) {
-                updateFields.add("address = ?");
-                updateValues.add(employeeData.getAddress());
-            }
-
             if (updateFields.isEmpty()) {
                 System.out.println("Error: No fields to update.");
                 return false;
@@ -221,11 +196,11 @@ public class EmployeeDAO {
         List<Object> params = new ArrayList<>();
         
         if (firstName != null && !firstName.isEmpty()) {
-            sql.append(" AND LOWER(first_name) LIKE LOWER(?)");
+            sql.append(" AND LOWER(Fname) LIKE LOWER(?)");
             params.add("%" + firstName + "%");
         }
         if (lastName != null && !lastName.isEmpty()) {
-            sql.append(" AND LOWER(last_name) LIKE LOWER(?)");
+            sql.append(" AND LOWER(Lname) LIKE LOWER(?)");
             params.add("%" + lastName + "%");
         }
         
@@ -419,5 +394,32 @@ public class EmployeeDAO {
         }
         return results;
     }
+
+    public static int updateSalariesInRange(double minSalary, double maxSalary, double percentage) {
+        // Basic validation
+        if (minSalary < 0 || maxSalary < minSalary) {
+            System.out.println("Error: Invalid salary range (Min cannot be negative or greater than Max).");
+            return 0;
+        }
+
+        // SQL calculation: New Salary = Old Salary * (1 + percent/100)
+        String sql = "UPDATE employees SET salary = salary * (1 + ? / 100) WHERE salary >= ? AND salary <= ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, percentage); // The percent (e.g., 5.0)
+            pstmt.setDouble(2, minSalary);
+            pstmt.setDouble(3, maxSalary);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected;
+
+        } catch (SQLException e) {
+            System.out.println("Error updating salaries by range: " + e.getMessage());
+            return -1;
+        }
+    }
+
 }
 
