@@ -19,7 +19,7 @@ public class HRAdmin extends User {
             System.out.println("4. Update Employee");
             System.out.println("5. Search Employee");
             System.out.println("6. Update Salaries Below Threshold");
-            System.out.println("7. Report: Pay by Job Title");
+            System.out.println("7. Report: Pay by Division");
             System.out.println("8. Logout");
             System.out.print("Select an option: ");
 
@@ -47,13 +47,13 @@ public class HRAdmin extends User {
                     updateSalariesBelowThreshold();
                     break;
                 case 7:
-                    generatePayReportByJobTitle();
+                    generatePayReportByDivision();
                     break;
                 case 8:
                     System.out.println("Logging out...");
                     break;
-                default:
-                    System.out.println("Invalid option, please try again.");
+                    default:
+                        System.out.println("Invalid option, please try again.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input! Please enter a number.");
@@ -370,8 +370,8 @@ public class HRAdmin extends User {
         }
     }
 
-    public void generatePayReportByJobTitle() {
-        System.out.println("\n=== Pay Report by Job Title ===");
+    public void generatePayReportByDivision() {
+        System.out.println("\n=== Pay Report by Division ===");
         
         try {
             System.out.print("Enter Year (e.g., 2024): ");
@@ -385,7 +385,7 @@ public class HRAdmin extends User {
                 return;
             }
             
-            Map<String, Map<String, Object>> report = EmployeeDAO.getPayReportByJobTitle(year, month);
+            Map<String, Map<String, Object>> report = EmployeeDAO.getPayReportByDivision(year, month);
             
             if (report.isEmpty()) {
                 System.out.println("No data found for the specified period.");
@@ -393,24 +393,24 @@ public class HRAdmin extends User {
             }
             
             System.out.println("\n==========================================");
-            System.out.println("PAY REPORT BY JOB TITLE");
+            System.out.println("PAY REPORT BY DIVISION");
             System.out.println("Period: " + getMonthName(month) + " " + year);
             System.out.println("==========================================");
-            System.out.printf("%-30s %-10s %-20s %-20s%n", "Job Title", "Count", "Total Monthly Pay", "Average Monthly Pay");
+            System.out.printf("%-30s %-10s %-20s %-20s%n", "Division", "Count", "Total Monthly Pay", "Average Monthly Pay");
             System.out.println("----------------------------------------------------------------------------");
             
             double grandTotalMonthly = 0;
             int grandTotalCount = 0;
             
             for (Map.Entry<String, Map<String, Object>> entry : report.entrySet()) {
-                String jobTitle = entry.getKey();
+                String division = entry.getKey();
                 Map<String, Object> data = entry.getValue();
                 int count = (Integer) data.get("count");
                 double totalMonthlyPay = (Double) data.get("totalMonthlyPay");
                 double avgMonthlyPay = (Double) data.get("averageMonthlyPay");
                 
                 System.out.printf("%-30s %-10d $%-19.2f $%-19.2f%n", 
-                    jobTitle, count, totalMonthlyPay, avgMonthlyPay);
+                    division, count, totalMonthlyPay, avgMonthlyPay);
                 
                 grandTotalMonthly += totalMonthlyPay;
                 grandTotalCount += count;
