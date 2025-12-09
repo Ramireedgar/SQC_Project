@@ -19,7 +19,8 @@ public class HRAdmin extends User {
             System.out.println("4. Update Employee");
             System.out.println("5. Search Employee");
             System.out.println("6. Update Salaries Below Threshold");
-            System.out.println("7. Logout");
+            System.out.println("7. Report: Employees Hired by Date Range");
+            System.out.println("8. Logout");
             System.out.print("Select an option: ");
 
             try {
@@ -42,12 +43,15 @@ public class HRAdmin extends User {
                     case 5:
                         searchEmployee();
                         break;
-                    case 6:
-                        updateSalariesBelowThreshold();
-                        break;
-                    case 7:
-                        System.out.println("Logging out...");
-                        break;
+                case 6:
+                    updateSalariesBelowThreshold();
+                    break;
+                case 7:
+                    generateEmployeesHiredReport();
+                    break;
+                case 8:
+                    System.out.println("Logging out...");
+                    break;
                     default:
                         System.out.println("Invalid option, please try again.");
                 }
@@ -55,7 +59,7 @@ public class HRAdmin extends User {
                 System.out.println("Invalid input! Please enter a number.");
                 option = 0; // Reset to ensure loop continues
             }
-        } while (option != 7);
+        } while (option != 8);
     }
 
     public void createEmployee() {
@@ -363,6 +367,48 @@ public class HRAdmin extends User {
             
         } catch (NumberFormatException e) {
             System.out.println("Invalid number format!");
+        }
+    }
+
+    public void generateEmployeesHiredReport() {
+        System.out.println("\n=== Employees Hired by Date Range ===");
+        
+        try {
+            System.out.print("Enter Start Date (YYYY-MM-DD): ");
+            String startDate = scanner.nextLine();
+            
+            System.out.print("Enter End Date (YYYY-MM-DD): ");
+            String endDate = scanner.nextLine();
+            
+            List<EmployeeData> employees = EmployeeDAO.getEmployeesHiredByDateRange(startDate, endDate);
+            
+            if (employees.isEmpty()) {
+                System.out.println("No employees found hired between " + startDate + " and " + endDate);
+                return;
+            }
+            
+            System.out.println("\n==========================================");
+            System.out.println("EMPLOYEES HIRED BY DATE RANGE");
+            System.out.println("Date Range: " + startDate + " to " + endDate);
+            System.out.println("Total Employees: " + employees.size());
+            System.out.println("==========================================");
+            System.out.printf("%-10s %-25s %-30s %-20s %-15s%n", 
+                "Emp ID", "Name", "Department", "Position", "Hire Date");
+            System.out.println("----------------------------------------------------------------------------");
+            
+            for (EmployeeData emp : employees) {
+                System.out.printf("%-10d %-25s %-30s %-20s %-15s%n",
+                    emp.getEmpId(),
+                    emp.getFirstName() + " " + emp.getLastName(),
+                    emp.getDepartment() != null ? emp.getDepartment() : "N/A",
+                    emp.getPosition() != null ? emp.getPosition() : "N/A",
+                    emp.getHireDate() != null ? emp.getHireDate() : "N/A");
+            }
+            
+            System.out.println("==========================================\n");
+            
+        } catch (Exception e) {
+            System.out.println("Error generating report: " + e.getMessage());
         }
     }
 }
