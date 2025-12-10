@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,8 @@ public class EmployeeDAO {
     public static boolean createEmployee(EmployeeData emp) {
         // Updated SQL to include empid explicitly
         String sql = "INSERT INTO employees (empid, Fname, Lname, email, " +
-                     "Salary, HireDate, DOB, SSN) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                     "Salary, HireDate, DOB, SSN, department, position) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -32,6 +33,8 @@ public class EmployeeDAO {
             pstmt.setString(6, emp.getHireDate());
             pstmt.setInt(7, emp.getDOB());
             pstmt.setInt(8, emp.getSSN());
+            pstmt.setString(9, emp.getDepartment());
+            pstmt.setString(10, emp.getPosition());
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -80,6 +83,8 @@ public class EmployeeDAO {
         } catch (SQLException e) {
             // SSN column might not exist in all tables, ignore if missing
         }
+        emp.setDepartment(rs.getString("department"));
+        emp.setPosition(rs.getString("position"));
         return emp;
     }
 
@@ -140,6 +145,10 @@ public class EmployeeDAO {
             if (employeeData.getHireDate() != null && !employeeData.getHireDate().isEmpty()) {
                 updateFields.add("hire_date = ?");
                 updateValues.add(employeeData.getHireDate());
+            }
+            if (employeeData.getPosition() != null && !employeeData.getPosition().isEmpty()){
+                updateFields.add("position = ?");
+                updateValues.add(employeeData.getPosition());
             }
             if (updateFields.isEmpty()) {
                 System.out.println("Error: No fields to update.");
@@ -421,5 +430,62 @@ public class EmployeeDAO {
         }
     }
 
-}
+/**
+     * Get pay report grouped by division (department) for a given month
+     * Returns a map with department as key and a map containing:
+     * - "count": number of employees
+     * - "totalMonthlyPay": total monthly pay for that department
+     * - "averageMonthlyPay": average monthly pay for that department
+     */
+    public static Map<String, Map<String, Object>> getPayReportByDivision(int year, int month) {
+        Map<String, Map<String, Object>> report = new HashMap<>();
+        String sql = "SELECT department, COUNT(*) as emp_count, SUM(salary) as total_salary, AVG(salary) as avg_salary " +
+                     "FROM employees " +
+                     "GROUP BY department " +
+                     "ORDER BY department";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String department = rs.getString("department");
+                int count = rs.getInt("emp_count");
+                double totalSalary = rs.getDouble("total_salary");
+                double avgSalary = rs.getDouble("avg_salary");
+                
+                Map<String, Object> data = new HashMap<>();
+                data.put("count", count);
+                data.put("totalMonthlyPay", totalSalary / 12.0);
+                data.put("averageMonthlyPay", avgSalary / 12.0);
+                data.put("totalAnnualPay", totalSalary);
+                data.put("averageAnnualPay", avgSalary);
+                
+                report.put(department, data);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating pay report by division: " + e.getMessage());
+        }
+        return report;
+    }
 
+public static List<EmployeeData> getEmployeesHiredByDateRange(String startDate, String endDate) {
+        List<EmployeeData> results = new ArrayList<>();
+        String sql = "SELECT * FROM employees WHERE HireDate >= ? AND HireDate <= ? ORDER BY HireDate";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                results.add(mapResultSetToEmployeeData(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving employees by hire date range: " + e.getMessage());
+        }
+        return results;
+    }
+
+}		

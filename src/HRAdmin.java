@@ -17,7 +17,9 @@ public class HRAdmin extends User {
             System.out.println("2. Update Employee");
             System.out.println("3. Search Employee");
             System.out.println("4. Update Salaries in range (min-max)");
-            System.out.println("5. Logout");
+            System.out.println("5. Report: Pay by Division");
+            System.out.println("6. Report: Employees Hired by Date Range");
+            System.out.println("7. Logout");
             System.out.print("Select an option: ");
 
             try {
@@ -38,6 +40,12 @@ public class HRAdmin extends User {
                         updateSalariesByRange();
                         break;
                     case 5:
+                        generatePayReportByDivision();
+                        break;
+                    case 6:
+                        generateEmployeesHiredReport();  //TESTING METHOD DEC 09 2025 IN PROG...
+                        break;
+                    case 7:
                         System.out.println("Logging out...");
                         break;
                     default:
@@ -47,7 +55,7 @@ public class HRAdmin extends User {
                 System.out.println("Invalid input! Please enter a number.");
                 option = 0; // Reset to ensure loop continues
             }
-        } while (option != 5);
+        } while (option != 7);
     }
 
     public void createEmployee() {
@@ -79,6 +87,14 @@ public class HRAdmin extends User {
 
             System.out.print("SSN (No dashes): ");
             newEmp.setSSN(Integer.parseInt(scanner.nextLine()));
+
+            // TESTING IN PROG STILL SENSITIVE
+            System.out.print("Department: ");
+            newEmp.setDepartment(scanner.nextLine());
+
+            System.out.print("Position: ");
+            newEmp.setPosition(scanner.nextLine());
+            //end of test code !!!...
 
             boolean success = EmployeeDAO.createEmployee(newEmp);
             
@@ -112,6 +128,7 @@ public class HRAdmin extends User {
             System.out.println("Email: " + currentEmployee.getEmail());
             System.out.println("Salary: " + currentEmployee.getSalary());
             System.out.println("Hire Date: " + currentEmployee.getHireDate());
+            System.err.println("Position: " + currentEmployee.getPosition());
             
             EmployeeData updatedData = new EmployeeData();
             
@@ -127,7 +144,7 @@ public class HRAdmin extends User {
             
             System.out.print("Email: ");
             String email = scanner.nextLine();
-            if (!email.isEmpty()) updatedData.setEmail(email);;
+            if (!email.isEmpty()) updatedData.setEmail(email);
             
             System.out.print("Salary: ");
             String salaryStr = scanner.nextLine();
@@ -142,6 +159,10 @@ public class HRAdmin extends User {
             System.out.print("Hire Date: ");
             String hireDate = scanner.nextLine();
             if (!hireDate.isEmpty()) updatedData.setHireDate(hireDate);
+
+            System.out.print("Position: ");
+            String pos = scanner.nextLine();
+            if (!pos.isEmpty()) updatedData.setPosition(pos);
             
             
             boolean success = EmployeeDAO.updateEmployee(empId, updatedData);
@@ -327,5 +348,112 @@ public class HRAdmin extends User {
             System.out.println("Error: Invalid number format. Please enter valid numbers.");
         }
     }
+
+    public void generatePayReportByDivision() {
+        System.out.println("\n=== Pay Report by Division ===");
+        
+        try {
+            System.out.print("Enter Year (e.g., 2024): ");
+            int year = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Enter Month (1-12): ");
+            int month = Integer.parseInt(scanner.nextLine());
+            
+            if (month < 1 || month > 12) {
+                System.out.println("Invalid month! Please enter a value between 1 and 12.");
+                return;
+            }
+            
+            Map<String, Map<String, Object>> report = EmployeeDAO.getPayReportByDivision(year, month);
+            
+            if (report.isEmpty()) {
+                System.out.println("No data found for the specified period.");
+                return;
+            }
+            
+            System.out.println("\n==========================================");
+            System.out.println("PAY REPORT BY DIVISION");
+            System.out.println("Period: " + getMonthName(month) + " " + year);
+            System.out.println("==========================================");
+            System.out.printf("%-30s %-10s %-20s %-20s%n", "Division", "Count", "Total Monthly Pay", "Average Monthly Pay");
+            System.out.println("----------------------------------------------------------------------------");
+            
+            double grandTotalMonthly = 0;
+            int grandTotalCount = 0;
+            
+            for (Map.Entry<String, Map<String, Object>> entry : report.entrySet()) {
+                String division = entry.getKey();
+                Map<String, Object> data = entry.getValue();
+                int count = (Integer) data.get("count");
+                double totalMonthlyPay = (Double) data.get("totalMonthlyPay");
+                double avgMonthlyPay = (Double) data.get("averageMonthlyPay");
+                
+                System.out.printf("%-30s %-10d $%-19.2f $%-19.2f%n", 
+                    division, count, totalMonthlyPay, avgMonthlyPay);
+                
+                grandTotalMonthly += totalMonthlyPay;
+                grandTotalCount += count;
+            }
+            
+            System.out.println("----------------------------------------------------------------------------");
+            System.out.printf("%-30s %-10d $%-19.2f%n", "TOTAL", grandTotalCount, grandTotalMonthly);
+            System.out.println("==========================================\n");
+            
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input format! Please enter valid numbers.");
+        }
+    }
+
+    private String getMonthName(int month) {
+        String[] monthNames = {
+            "", "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+        return monthNames[month];
+    }
+    
+public void generateEmployeesHiredReport() {
+        System.out.println("\n=== Employees Hired by Date Range ===");
+
+        try {
+            System.out.print("Enter Start Date (YYYY-MM-DD): ");
+            String startDate = scanner.nextLine();
+
+            System.out.print("Enter End Date (YYYY-MM-DD): ");
+            String endDate = scanner.nextLine();
+
+            List<EmployeeData> employees = EmployeeDAO.getEmployeesHiredByDateRange(startDate, endDate);
+
+            if (employees.isEmpty()) {
+                System.out.println("No employees found hired between " + startDate + " and " + endDate);
+                return;
+            }
+
+            System.out.println("\n==========================================");
+            System.out.println("EMPLOYEES HIRED BY DATE RANGE");
+            System.out.println("Date Range: " + startDate + " to " + endDate);
+            System.out.println("Total Employees: " + employees.size());
+            System.out.println("==========================================");
+            System.out.printf("%-10s %-25s %-30s %-20s %-15s%n", 
+                "Emp ID", "Name", "Department", "Position", "Hire Date");
+            System.out.println("--------------------------------------------------------------------------------------------------------------------");
+
+            for (EmployeeData emp : employees) {
+                System.out.printf("%-10d %-25s %-30s %-20s %-15s%n",
+                    emp.getEmpId(),
+                    emp.getFirstName() + " " + emp.getLastName(),
+                    emp.getDepartment() != null ? emp.getDepartment() : "N/A",
+                    emp.getPosition() != null ? emp.getPosition() : "N/A",
+                    emp.getHireDate() != null ? emp.getHireDate() : "N/A");
+            }
+
+            System.out.println("==========================================\n");
+
+        } catch (Exception e) {
+            System.out.println("Error generating report: " + e.getMessage());
+        }
+    }
+
+
 
 }
