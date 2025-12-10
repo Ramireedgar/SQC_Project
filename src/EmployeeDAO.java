@@ -488,4 +488,43 @@ public static List<EmployeeData> getEmployeesHiredByDateRange(String startDate, 
         return results;
     }
 
+/**
+     * Get pay report grouped by job title (position) for a given month
+     * Returns a map with job title as key and a map containing:
+     * - "count": number of employees
+     * - "totalMonthlyPay": total monthly pay for that job title
+     * - "averageMonthlyPay": average monthly pay for that job title
+     */
+    public static Map<String, Map<String, Object>> getPayReportByJobTitle(int year, int month) {
+        Map<String, Map<String, Object>> report = new HashMap<>();
+        String sql = "SELECT position, COUNT(*) as emp_count, SUM(salary) as total_salary, AVG(salary) as avg_salary " +
+                     "FROM employees " +
+                     "GROUP BY position " +
+                     "ORDER BY position";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String position = rs.getString("position");
+                int count = rs.getInt("emp_count");
+                double totalSalary = rs.getDouble("total_salary");
+                double avgSalary = rs.getDouble("avg_salary");
+                
+                Map<String, Object> data = new HashMap<>();
+                data.put("count", count);
+                data.put("totalMonthlyPay", totalSalary / 12.0);
+                data.put("averageMonthlyPay", avgSalary / 12.0);
+                data.put("totalAnnualPay", totalSalary);
+                data.put("averageAnnualPay", avgSalary);
+                
+                report.put(position, data);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating pay report by job title: " + e.getMessage());
+        }
+        return report;
+    }
+
 }		

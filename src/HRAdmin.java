@@ -18,8 +18,9 @@ public class HRAdmin extends User {
             System.out.println("3. Search Employee");
             System.out.println("4. Update Salaries in range (min-max)");
             System.out.println("5. Report: Pay by Division");
-            System.out.println("6. Report: Employees Hired by Date Range");
-            System.out.println("7. Logout");
+            System.out.println("6. Report: Pay by Job Title");
+            System.out.println("7. Report: Employees Hired by Date Range");
+            System.out.println("8. Logout");
             System.out.print("Select an option: ");
 
             try {
@@ -43,9 +44,12 @@ public class HRAdmin extends User {
                         generatePayReportByDivision();
                         break;
                     case 6:
-                        generateEmployeesHiredReport();  //TESTING METHOD DEC 09 2025 IN PROG...
+                        generatePayReportByJobTitle();
                         break;
                     case 7:
+                        generateEmployeesHiredReport();  //TESTING METHOD DEC 09 2025 IN PROG...
+                        break;
+                    case 8:
                         System.out.println("Logging out...");
                         break;
                     default:
@@ -55,7 +59,7 @@ public class HRAdmin extends User {
                 System.out.println("Invalid input! Please enter a number.");
                 option = 0; // Reset to ensure loop continues
             }
-        } while (option != 7);
+        } while (option != 8);
     }
 
     public void createEmployee() {
@@ -451,6 +455,61 @@ public void generateEmployeesHiredReport() {
 
         } catch (Exception e) {
             System.out.println("Error generating report: " + e.getMessage());
+        }
+    }
+
+public void generatePayReportByJobTitle() {
+        System.out.println("\n=== Pay Report by Job Title ===");
+
+        try {
+            System.out.print("Enter Year (e.g., 2024): ");
+            int year = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Enter Month (1-12): ");
+            int month = Integer.parseInt(scanner.nextLine());
+
+            if (month < 1 || month > 12) {
+                System.out.println("Invalid month! Please enter a value between 1 and 12.");
+                return;
+            }
+
+            Map<String, Map<String, Object>> report = EmployeeDAO.getPayReportByJobTitle(year, month);
+
+            if (report.isEmpty()) {
+                System.out.println("No data found for the specified period.");
+                return;
+            }
+
+            System.out.println("\n==========================================");
+            System.out.println("PAY REPORT BY JOB TITLE");
+            System.out.println("Period: " + getMonthName(month) + " " + year);
+            System.out.println("==========================================");
+            System.out.printf("%-30s %-10s %-20s %-20s%n", "Job Title", "Count", "Total Monthly Pay", "Average Monthly Pay");
+            System.out.println("----------------------------------------------------------------------------");
+
+            double grandTotalMonthly = 0;
+            int grandTotalCount = 0;
+
+            for (Map.Entry<String, Map<String, Object>> entry : report.entrySet()) {
+                String jobTitle = entry.getKey();
+                Map<String, Object> data = entry.getValue();
+                int count = (Integer) data.get("count");
+                double totalMonthlyPay = (Double) data.get("totalMonthlyPay");
+                double avgMonthlyPay = (Double) data.get("averageMonthlyPay");
+
+                System.out.printf("%-30s %-10d $%-19.2f $%-19.2f%n", 
+                    jobTitle, count, totalMonthlyPay, avgMonthlyPay);
+
+                grandTotalMonthly += totalMonthlyPay;
+                grandTotalCount += count;
+            }
+
+            System.out.println("----------------------------------------------------------------------------");
+            System.out.printf("%-30s %-10d $%-19.2f%n", "TOTAL", grandTotalCount, grandTotalMonthly);
+            System.out.println("==========================================\n");
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input format! Please enter valid numbers.");
         }
     }
 
