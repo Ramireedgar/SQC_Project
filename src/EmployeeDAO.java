@@ -127,11 +127,11 @@ public class EmployeeDAO {
             List<Object> updateValues = new ArrayList<>();
 
             if (employeeData.getFirstName() != null && !employeeData.getFirstName().isEmpty()) {
-                updateFields.add("first_name = ?");
+                updateFields.add("Fname = ?");
                 updateValues.add(employeeData.getFirstName());
             }
             if (employeeData.getLastName() != null && !employeeData.getLastName().isEmpty()) {
-                updateFields.add("last_name = ?");
+                updateFields.add("Lname = ?");
                 updateValues.add(employeeData.getLastName());
             }
             if (employeeData.getEmail() != null && !employeeData.getEmail().isEmpty()) {
@@ -139,11 +139,11 @@ public class EmployeeDAO {
                 updateValues.add(employeeData.getEmail());
             }
             if (employeeData.getSalary() > 0) {
-                updateFields.add("salary = ?");
+                updateFields.add("Salary = ?");
                 updateValues.add(employeeData.getSalary());
             }
             if (employeeData.getHireDate() != null && !employeeData.getHireDate().isEmpty()) {
-                updateFields.add("hire_date = ?");
+                updateFields.add("HireDate = ?");
                 updateValues.add(employeeData.getHireDate());
             }
             if (employeeData.getPosition() != null && !employeeData.getPosition().isEmpty()){

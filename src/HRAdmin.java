@@ -454,6 +454,4 @@ public void generateEmployeesHiredReport() {
         }
     }
 
-
-
 }
